@@ -1,0 +1,16 @@
+---
+title: "Time Series Analysis - Assignment 2"
+author: "Aditya Dhapola, Drashti Khakhi, Hansika Surenthar, Nandhini, Shekhar Hazari"
+date: "13/05/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+library(readxl)
+Properties_Sold <- read_excel("Properties Sold.xlsx")
+head(Properties_Sold)
+```
