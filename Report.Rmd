@@ -9,8 +9,73 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r cars}
+```{r}
 library(readxl)
-Properties_Sold <- read_excel("Properties Sold.xlsx")
-head(Properties_Sold)
+library(lubridate)
+library(TSA)
 ```
+
+
+```{r cars}
+Properties_Sold <- read_excel("Properties Sold.xlsx")
+data <- ts(Properties_Sold$Properties_Sold, start = c(2016, 4), frequency = 12)
+```
+
+```{r}
+plot(data, type='l', ylab="Properties sold in Melbourne",
+main = "Time series plot for Properties sold in Melbourne")
+points(y = data, x = time(data),
+pch = as.vector(season(data)))
+```
+
+```{r}
+# Uncomment the next line if baggedImpute not already installed
+#library(devtools); install_github("demirhanhaydar/baggedImpute")
+library(baggedImpute)
+```
+
+```{r}
+imputed_data <- na_kalman(data)
+```
+
+```{r}
+plot(imputed_data, type='l', ylab="Properties sold in Melbourne",
+main = "Time series plot for Properties sold in Melbourne")
+points(y = data, x = time(imputed_data),
+pch = as.vector(season(imputed_data)))
+```
+
+```{r}
+t <- time(imputed_data)
+t2 <- t^2
+model_t <- lm(imputed_data ~ t)
+summary(model_t)
+```
+
+```{r}
+model_t_t2 <- lm(imputed_data ~ t+t2)
+summary(model_t_t2)
+```
+
+```{r}
+plot(ts(fitted(model_t_t2)), ylab='y', main = "Fitted quadratic curve to sold properties series.",
+ylim = c(min(c(fitted(model_t_t2), as.vector(imputed_data))) ,
+max(c(fitted(model_t_t2), as.vector(imputed_data)))
+) )
+lines(as.vector(imputed_data),type="o")
+```
+
+```{r}
+month_ <- season(imputed_data)
+model_month <- lm(imputed_data ~ month_-1)
+summary(model_month)
+```
+
+```{r}
+plot(ts(fitted(model3)), ylab='y', main = "Fitted seaonal model to monthly max temp series@
+ylim = c(min(c(fitted(model3), as.vector(monthlyMaxTempTS))) ,
+max(c(fitted(model3), as.vector(monthlyMaxTempTS)))
+), col = "red" )
+lines(as.vector(monthlyMaxTempTS),type="o")
+```
+
