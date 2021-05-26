@@ -28,11 +28,6 @@ points(y = data, x = time(data),
 pch = as.vector(season(data)))
 ```
 
-```{r}
-# Uncomment the next line if baggedImpute not already installed
-#library(devtools); install_github("demirhanhaydar/baggedImpute")
-library(baggedImpute)
-```
 
 ```{r}
 imputed_data <- na_kalman(data)
@@ -66,16 +61,78 @@ lines(as.vector(imputed_data),type="o")
 ```
 
 ```{r}
+plot(y=rstudent(model_t_t2),x=as.vector(time(imputed_data)), xlab='Time',
+ylab='Standardized Residuals', type = 'l', main = "Time series plot of standardized residuals using t+t2 model")
+points(y=rstudent(model_t_t2),x=as.vector(time(imputed_data)),
+pch=as.vector(season(imputed_data)))
+```
+
+```{r}
+y = rstudent(model_t_t2)
+hist(y)
+qqnorm(y, main = "QQ plot of standardised residuals for the model_t_t2")
+qqline(y, col = 2, lwd = 1, lty = 2)
+shapiro.test(y)
+acf(y)
+```
+
+
+```{r}
 month_ <- season(imputed_data)
 model_month <- lm(imputed_data ~ month_-1)
 summary(model_month)
 ```
 
 ```{r}
-plot(ts(fitted(model3)), ylab='y', main = "Fitted seaonal model to monthly max temp series@
-ylim = c(min(c(fitted(model3), as.vector(monthlyMaxTempTS))) ,
-max(c(fitted(model3), as.vector(monthlyMaxTempTS)))
+plot(ts(fitted(model_month)), ylab='y', main = "Fitted seaonal model to monthly houses sold series",
+ylim = c(min(c(fitted(model_month), as.vector(imputed_data))) ,
+max(c(fitted(model_month), as.vector(imputed_data)))
 ), col = "red" )
-lines(as.vector(monthlyMaxTempTS),type="o")
+lines(as.vector(imputed_data),type="o")
+```
+
+```{r}
+plot(y=rstudent(model_month),x=as.vector(time(imputed_data)), xlab='Time',
+ylab='Standardized Residuals', type = 'l', main = "Time series plot of standardized residuals using seasonal model")
+points(y=rstudent(model_month),x=as.vector(time(imputed_data)),
+pch=as.vector(season(imputed_data)))
+```
+
+```{r}
+y_month = rstudent(model_month)
+hist(y_month)
+qqnorm(y_month, main = "QQ plot of standardised residuals for the model_t_t2")
+qqline(y_month, col = 2, lwd = 1, lty = 2)
+shapiro.test(y_month)
+acf(y_month)
+```
+
+
+```{r}
+har. <- harmonic(imputed_data, 1) # calculate cos(2*pi*t) and sin(2*pi*t)
+data <- data.frame(imputed_data,har.)
+model_har <- lm(imputed_data ~ cos.2.pi.t. + sin.2.pi.t. , data = data)
+summary(model_har)
+```
+
+```{r}
+plot(ts(fitted(model_har)), ylab='y', main = "Fitted cosine wave to monthly houses sold series",
+ylim = c(min(c(fitted(model_har), as.vector(imputed_data))) ,
+max(c(fitted(model_har), as.vector(imputed_data)))
+), col = "green" )
+lines(as.vector(imputed_data),type="o")
+```
+
+```{r}
+acf(imputed_data)
+```
+
+```{r}
+pacf(imputed_data)
+```
+
+```{r}
+res = armasubsets(y=imputed_data , nar=10 , nma=10, y.name='Properties', ar.method='ols')
+plot(res)
 ```
 
